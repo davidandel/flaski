@@ -1,21 +1,174 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knihovna</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(to right, #f0f8ff, #e6e6fa);
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            padding: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .book-item {
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            opacity: 0;
+            transform: translateX(100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+        }
+        .book-item.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        img {
+            width: 100px;
+            height: auto;
+            margin-right: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .remove-btn, .view-btn {
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .remove-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        .remove-btn:hover {
+            background-color: #c82333;
+        }
+        .view-btn {
+            background-color: #007bff;
+            color: white;
+            margin-right: 10px;
+        }
+        .view-btn:hover {
+            background-color: #0069d9;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-control {
+            border-radius: 20px;
+        }
+        .btn-primary {
+            border-radius: 20px;
+        }
+        .modal img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+    <script>
+        function showBookItems() {
+            const items = document.querySelectorAll('.book-item');
+            items.forEach((item, index) => {
+                setTimeout(() => {
+                    item.classList.add('show');
+                }, index * 200);
+            });
+        }
 
-<!DOCTYPE html> 
-<html lang="en"> 
-<head> 
-    <meta charset="UTF-8"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Todo List</title> 
-</head> 
-<body> 
-    <h1>Todo List</h1> 
-    <form action="/add_task" method="POST"> 
-        <input type="text" name="task_name" placeholder="Task name"> 
-        <button type="submit">Add Task</button> 
-    </form> 
-    <ul> 
-        {% for task in tasks %} 
-            <li>{{ task.name }} <a href="/delete_task/{{ task._id }}">Delete</a></li> 
-        {% endfor %} 
-    </ul> 
-</body> 
-</html> 
+        function openImageModal(imgSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = imgSrc;
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            modal.style.display = 'none';
+        }
+
+        function openDetailsModal(title, author, description) {
+            const modal = document.getElementById('detailsModal');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalAuthor').innerText = author;
+            document.getElementById('modalDescription').innerText = description;
+            modal.style.display = 'block';
+        }
+
+        function closeDetailsModal() {
+            const modal = document.getElementById('detailsModal');
+            modal.style.display = 'none';
+        }
+    </script>
+</head>
+<body onload="showBookItems()">
+    <div class="container">
+        <h1 class="mt-5">Správa knih</h1>
+        <form action="/add_book" method="post" enctype="multipart/form-data" class="mb-4">
+            <div class="form-group">
+                <input type="text" name="title" class="form-control" placeholder="Název knihy" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="author" class="form-control" placeholder="Autor knihy" required>
+            </div>
+            <div class="form-group">
+                <textarea name="description" class="form-control" placeholder="Popis knihy" required></textarea>
+            </div>
+            <div class="form-group">
+                <input type="file" name="image" class="form-control" accept="image/*" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Přidat knihu</button>
+        </form>
+        <h2>Seznam knih</h2>
+        <ul class="list-group">
+            {% for book in books %}
+                <li class="list-group-item book-item">
+                    <div style="display: flex; align-items: center;">
+                        <img src="{{ url_for('static', filename='uploads/' + book.image) }}" alt="{{ book.title }}" onclick="openImageModal(this.src)">
+                        <div>
+                            <strong>{{ book.title }}</strong><br>
+                            <span>Od: {{ book.author }}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <a href="/delete_book/{{ book._id }}" class="remove-btn">Odstranit</a>
+                        <button class="view-btn" onclick="openDetailsModal('{{ book.title }}', '{{ book.author }}', '{{ book.description }}')">Zobrazit knihu</button>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+        <footer>
+            &copy; 2024 Knihovna. Všechna práva vyhrazena.
+        </footer>
+    </div>
+
+    <!-- Modální okno pro obrázek -->
+    <div id="imageModal" class="modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.8);">
+        <span onclick="closeImageModal()" style="color:white; font-size:30px; position:absolute; top:20px; right:30px; cursor:pointer;">&times;</span>
+        <img id="modalImage" style="margin: auto; display: block; max-width: 90%; max-height: 90%; padding-top: 50px;">
+    </div>
+    
+    <!-- Modální okno pro detaily knihy -->
+    <div id="detailsModal" class="modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.8); padding: 20px;">
+        <span onclick="closeDetailsModal()" style="color:white; font-size:30px; position:absolute; top:20px; right:30px; cursor:pointer;">&times;</span>
+        <div style="background-color: white; border-radius: 10px; padding: 20px; max-width: 600px; margin: auto; position: relative; top: 20%;">
+            <h3 id="modalTitle"></h3>
+            <p><strong>Autor: </strong><span id="modalAuthor"></span></p>
+            <p id="modalDescription"></p>
+        </div>
+    </div>
+</body>
+</html>
