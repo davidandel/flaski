@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knihovna</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Správa knih</h1>
+        <form action="/add_book" method="post" class="mb-4">
+            <div class="form-group">
+                <input type="text" name="title" class="form-control" placeholder="Název knihy" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="author" class="form-control" placeholder="Autor knihy" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Přidat knihu</button>
+        </form>
+        <h2>Seznam knih</h2>
+        <ul class="list-group">
+            {% for book in books %}
+                <li class="list-group-item">
+                    <strong>{{ book.title }}</strong> od {{ book.author }}
+                    <a href="/delete_book/{{ book._id }}" class="btn btn-danger btn-sm float-right">Odstranit</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
